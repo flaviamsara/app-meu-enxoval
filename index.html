@@ -111,7 +111,9 @@ h1,h2,h3{font-family:var(--display);font-weight:400;font-style:italic;margin:0;l
 .ph .em{font-size:44px;filter:saturate(.8);opacity:.92}
 .ph.ghost:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(255,255,255,.55),transparent 55%)}
 
-.back{display:inline-flex;align-items:center;gap:6px;color:var(--paper);font-weight:600;font-size:14px;padding:6px 4px;text-shadow:0 1px 8px rgba(44,51,33,.6)}
+.back{display:inline-flex;align-items:center;gap:8px;color:var(--olive-deep);font-weight:700;font-size:16px;padding:11px 22px 11px 16px;background:rgba(246,242,230,.95);border-radius:99px;box-shadow:var(--shadow);transition:transform .15s}
+.back span{font-size:26px;line-height:1;margin-top:-3px}
+.back:hover{transform:translateX(-2px)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
 .stat small{display:block;color:#C9D4BC;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 .stat b{font-family:var(--display);font-style:italic;font-weight:400;font-size:23px;letter-spacing:-.03em;color:var(--sage);white-space:nowrap}
@@ -206,6 +208,85 @@ textarea.in{resize:none;min-height:70px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(160px + env(safe-area-inset-bottom));background:var(--olive-deep);color:var(--sage);padding:12px 18px;border-radius:99px;font-size:14px;display:none;align-items:center;gap:14px;z-index:60;box-shadow:0 14px 30px -10px rgba(0,0,0,.5);max-width:440px;width:calc(100% - 32px);justify-content:space-between}
 .toast.show{display:flex;animation:up .2s}
 .toast button{color:#F2B7A6;font-weight:700;white-space:nowrap}
+
+/* ===== resumo: gráficos ===== */
+.charts{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+.cc{background:var(--paper);border-radius:22px;padding:18px 18px 14px;box-shadow:var(--shadow);min-width:0}
+.cc h3{font-size:26px;color:var(--olive-deep);margin-bottom:6px}
+.cc .sub{color:var(--muted);font-size:13px;margin:-2px 0 10px}
+.cc .rbar{padding:7px 0}
+.cc .rbar span{width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cc .rbar em{width:92px}
+.dnrow{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:8px}
+.dn{position:relative;width:140px;height:140px;flex:none}
+.dc{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.dc b{font-family:var(--display);font-style:italic;font-weight:400;font-size:34px;letter-spacing:-.03em;line-height:1}
+.dc small{font-size:11.5px;color:var(--muted)}
+.lg{display:flex;flex-direction:column;gap:9px;flex:1;min-width:140px}
+.lg>div{display:flex;align-items:center;gap:9px;font-size:13.5px}
+.lg i{width:11px;height:11px;border-radius:50%;flex:none}
+.lg em{font-style:normal;color:var(--muted);margin-left:auto;font-size:12.5px;white-space:nowrap}
+.lg.inline{flex-direction:row;gap:18px;margin:2px 0 8px}
+.pair{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.pair>span{width:118px;font-size:13.5px;font-weight:500;flex:none}
+.pair>div{flex:1;display:flex;flex-direction:column;gap:5px}
+.pair .bar{height:8px}
+.pair em{font-style:normal;font-size:13px;width:96px;text-align:right;flex:none;font-weight:600}
+.pair em small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.mini{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.mini .ph{width:48px;height:48px;border-radius:12px;flex:none}
+.mini .ph .em{font-size:20px}
+.mini div{flex:1;min-width:0}
+.mini b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini small{color:var(--muted);font-size:12px}
+.mini .price{margin:0;font-size:19px}
+
+/* ===== tablet ===== */
+@media (min-width:640px){
+ #app{max-width:720px}
+ .tabs{max-width:720px}
+ .fab{right:max(20px,calc(50% - 360px + 20px))}
+ .sheet{max-width:560px}
+ .pgrid,.grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ===== computador: barra lateral + área larga ===== */
+@media (min-width:960px){
+ #app{max-width:1340px;padding:36px 48px 90px 306px}
+ .tabs{left:24px;top:24px;bottom:24px;transform:none;width:238px;max-width:none;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:6px;padding:26px 16px;border-radius:28px;background:rgba(246,242,230,.95);box-shadow:var(--shadow)}
+ .tabs:before{content:"Meu Enxoval";font:italic 400 38px/1 var(--display);letter-spacing:-.035em;color:var(--olive-deep);padding:2px 12px 24px}
+ .tabs button{flex-direction:row;justify-content:flex-start;gap:14px;font-size:15.5px;padding:13px 16px;border-radius:16px;transition:background .15s}
+ .tabs button.on{background:var(--olive);color:var(--sage)}
+ .tabs button:hover:not(.on){background:rgba(106,119,74,.12)}
+ .fab{right:auto;left:48px;bottom:48px;width:190px;height:54px;border-radius:99px;font-size:0;padding:0}
+ .fab:before{content:"＋  Novo item";font:700 16px var(--body)}
+ .toast{bottom:36px}
+ .ov{align-items:center}
+ .sheet{max-width:620px;border-radius:28px;max-height:88vh;padding-top:28px}
+ .grab{display:none}
+ .title{font-size:76px}
+ .hero-body .big{font-size:34px}
+ .grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+ .hscroll{margin:0;padding-left:2px;padding-right:2px}
+ .urg{width:210px}
+ .pgrid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+ .rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:14px}
+ .tools{max-width:640px}
+ .seg{max-width:540px}
+ .stats{max-width:560px}
+ .stat b{font-size:28px}
+ .big-cards{grid-template-columns:repeat(3,1fr)}
+ .bc.full{grid-column:auto}
+ .charts{grid-template-columns:1fr 1fr;gap:18px}
+ .cc.wide{grid-column:1/-1}
+ .card,.room,.urg,.row{transition:transform .15s,box-shadow .15s}
+ .card:hover,.room:hover,.urg:hover{transform:translateY(-3px)}
+ .row:hover{transform:translateY(-2px)}
+ .rbar span{width:140px}
+}
+@media (min-width:1500px){
+ .pgrid{grid-template-columns:repeat(auto-fill,minmax(235px,1fr))}
+}
 </style>
 </head>
 <body>
@@ -440,7 +521,7 @@ function home(){
   const st=stats(S.items);const urg=S.items.filter(i=>i.prio==='U'&&!i.bought).slice(0,10);
   return `<div class="stamp"><div class="hero-top"><span class="kicker">Nosso lar</span><h1 class="title">Meu Enxoval</h1></div>
    <div class="hero-body">${ring(st.total?st.done/st.total:0)}<div><p class="big">${st.done} de ${st.total} itens</p><p>${st.pend} ainda faltam<br>${brl(st.left)} estimados</p></div></div></div>
-  ${urg.length?`<div class="sec"><div class="pill"><h2>Pra comprar logo</h2><span>${urg.length}</span></div></div><div class="hscroll">${urg.map(i=>`<button class="urg" data-act="edit" data-id="${i.id}">${photo(i)}<div class="t"><b>${esc(i.name)}</b><small>${i.est!=null?brl(i.est):room(i.room).name}</small></div></button>`).join('')}</div>`:''}
+  ${urg.length?`<div class="sec"><div class="pill"><h2>Urgentes</h2><span>${urg.length}</span></div></div><div class="hscroll">${urg.map(i=>`<button class="urg" data-act="edit" data-id="${i.id}">${photo(i)}<div class="t"><b>${esc(i.name)}</b><small>${i.est!=null?brl(i.est):room(i.room).name}</small></div></button>`).join('')}</div>`:''}
   <div class="sec"><div class="pill"><h2>Cômodos</h2><span>${S.rooms.length}</span></div></div>
   <div class="grid">${S.rooms.map((r,ix)=>{const s=stats(S.items.filter(i=>i.room===r.id));const pct=s.total?s.done/s.total*100:0;
     return `<button class="room" data-act="room" data-id="${r.id}"><div class="ico" style="${roomIco(ix)}">${r.emoji}</div><div><b>${esc(r.name)}</b><small>${s.total?`${s.done} de ${s.total} ${s.total===1?'comprado':'comprados'}`:'Nenhum item ainda'}</small></div><div class="bar"><i style="width:${pct}%"></i></div></button>`}).join('')}
@@ -451,9 +532,10 @@ function roomView(){
   const r=room(cur);let items=S.items.filter(i=>i.room===cur);const st=stats(items);
   if(filter==='pend')items=items.filter(i=>!i.bought);if(filter==='done')items=items.filter(i=>i.bought);
   if(q)items=items.filter(i=>i.name.toLowerCase().includes(q.toLowerCase()));
-  items=[...items].sort((a,b)=>a.bought-b.bought||'UNP'.indexOf(a.prio)-'UNP'.indexOf(b.prio)||a.name.localeCompare(b.name));
+  const stamp=i=>/^i\d+$/.test(i.id)?0:Date.parse(i.created_at)||Date.now();
+  items=[...items].sort((a,b)=>stamp(b)-stamp(a)||a.name.localeCompare(b.name));
   const empty=`<div class="empty">${S.items.some(i=>i.room===cur)?'Nada por aqui com esse filtro.':'Esse cômodo ainda está vazio.<br>Toque no + pra adicionar o primeiro item.'}</div>`;
-  return `<button class="back" data-act="home">‹ Início</button>
+  return `<button class="back" data-act="home"><span>‹</span>Início</button>
   <div class="stamp" style="margin-top:6px"><span class="kicker">${r.emoji} Cômodo</span><h1 class="title" style="font-size:50px">${esc(r.name)}</h1>
    <div class="stats"><div class="stat"><small>Comprados</small><b>${st.done}/${st.total}</b></div><div class="stat"><small>Gasto</small><b>${brl(st.spent).replace(',00','')}</b></div><div class="stat"><small>Falta</small><b>${brl(st.left).replace(',00','')}</b></div></div></div>
   <div class="tools"><div class="search"><input id="q" placeholder="Buscar em ${esc(r.name)}" value="${esc(q)}" aria-label="Buscar"></div>
@@ -471,15 +553,38 @@ function listView(){
   <div class="seg">${[['loja','Por loja'],['room','Por cômodo'],['prio','Por prioridade']].map(([k,l])=>`<button class="${group===k?'on':''}" data-act="group" data-id="${k}">${l}</button>`).join('')}</div>
   ${keys.map(k=>`<div class="group"><div class="pill"><h3>${esc(k)}</h3><span>${g[k].length} ${g[k].length===1?'item':'itens'} · ${brl(sum(g[k].map(i=>i.est)))}</span></div></div><div class="rows" style="margin-top:10px">${g[k].map(i=>rowHTML(i,group!=='room')).join('')}</div>`).join('')||'<div class="empty">Tudo comprado!</div>'}`;
 }
+const COL=['#6A774A','#8D86B8','#C9B250','#5C8F85','#CF6249','#C9A0B5'];
+function donut(parts,center,sub){const Z=140,T=20,R=(Z-T)/2,C=2*Math.PI*R,tot=sum(parts.map(p=>p.v))||1;let off=0;
+  const segs=parts.filter(p=>p.v>0).map(p=>{const l=p.v/tot*C;const e=`<circle cx="${Z/2}" cy="${Z/2}" r="${R}" fill="none" stroke="${p.c}" stroke-width="${T}" stroke-dasharray="${l} ${C-l}" stroke-dashoffset="${-off}"/>`;off+=l;return e}).join('');
+  return `<div class="dn"><svg width="${Z}" height="${Z}" viewBox="0 0 ${Z} ${Z}"><circle cx="${Z/2}" cy="${Z/2}" r="${R}" fill="none" stroke="#E2DCC8" stroke-width="${T}"/><g transform="rotate(-90 ${Z/2} ${Z/2})">${segs}</g></svg><div class="dc"><b>${center}</b><small>${sub||''}</small></div></div>`}
+const legend=parts=>`<div class="lg">${parts.map(p=>`<div><i style="background:${p.c}"></i><span>${esc(p.l)}</span><em>${p.t}</em></div>`).join('')}</div>`;
+const hrow=(label,v,max,color,txt)=>`<div class="rbar"><span title="${esc(label)}">${esc(label)}</span><div class="bar"><i style="width:${max&&v>0?Math.max(3,v/max*100):0}%;background:${color}"></i></div><em>${txt}</em></div>`;
 function summaryView(){
-  const st=stats(S.items);const saved=sum(S.items.filter(i=>i.bought&&i.est!=null&&i.paid!=null).map(i=>i.est-i.paid));
-  const max=Math.max(1,...S.rooms.map(r=>sum(S.items.filter(i=>i.room===r.id).map(i=>i.est))));
+  const st=stats(S.items),pend=S.items.filter(i=>!i.bought),n=S.items.length||1;
+  const saved=sum(S.items.filter(i=>i.bought&&i.est!=null&&i.paid!=null).map(i=>i.est-i.paid));
+  const prog=[{v:st.done,c:COL[0],l:'Comprados',t:st.done},{v:st.pend,c:'#D9D2B8',l:'Faltam',t:st.pend}];
+  const rm=S.rooms.map(r=>{const its=S.items.filter(i=>i.room===r.id);return{r,est:sum(its.map(i=>i.est)),paid:sum(its.filter(i=>i.bought).map(i=>i.paid))}}).filter(x=>x.est||x.paid);
+  const mx=Math.max(1,...rm.map(x=>Math.max(x.est,x.paid)));
+  const lj={};pend.forEach(i=>{const k=i.loja||'Sem loja';lj[k]=(lj[k]||0)+(i.est||0)});
+  let lk=Object.entries(lj).sort((a,b)=>b[1]-a[1]);if(lk.length>6){const rest=sum(lk.slice(5).map(x=>x[1]));lk=[...lk.slice(0,5),['Outras',rest]]}
+  const lmx=Math.max(1,...lk.map(x=>x[1]));
+  const pr=['U','N','P'].map((k,ix)=>{const its=pend.filter(i=>i.prio===k);return{n:its.length,v:sum(its.map(i=>i.est)),c:['#CF6249','#C9B250','#8D86B8'][ix],l:PRIO[k]}});
+  const top=[...pend].filter(i=>i.est!=null).sort((a,b)=>b.est-a.est).slice(0,5);
+  const comp=[['Com foto',S.items.filter(i=>i.img).length],['Com link',S.items.filter(i=>i.link).length],['Com preço estimado',S.items.filter(i=>i.est!=null).length],['Com loja',S.items.filter(i=>i.loja).length]];
   return `<div class="stamp"><span class="kicker">Como estamos</span><h1 class="title" style="font-size:50px">Resumo</h1>
    <div class="hero-body" style="margin-top:14px"><div><p>Já gasto</p><p class="big" style="font-size:40px">${brl(st.spent)}</p></div></div></div>
   <div class="big-cards"><div class="bc"><small>Ainda falta (estim.)</small><b>${brl(st.left)}</b></div><div class="bc"><small>${saved>=0?'Economizado':'Acima do estimado'}</small><b style="color:var(--olive)">${brl(Math.abs(saved))}</b></div>
   <div class="bc full"><small>Itens</small><b>${st.done} comprados · ${st.pend} pendentes</b></div></div>
-  <div class="sec"><div class="pill"><h2>Por cômodo</h2><span>valor estimado</span></div></div>
-  <div class="rbars">${S.rooms.map((r,ix)=>{const v=sum(S.items.filter(i=>i.room===r.id).map(i=>i.est));return `<div class="rbar"><span>${esc(r.name)}</span><div class="bar"><i style="width:${v/max*100}%;background:${PAL[ix%PAL.length][1]}"></i></div><em>${brl(v)}</em></div>`}).join('')}</div>`;
+  <div class="charts">
+   <div class="cc"><h3>Progresso</h3><div class="dnrow">${donut(prog,Math.round(st.done/n*100)+'%','comprado')}${legend(prog)}</div></div>
+   <div class="cc"><h3>Por prioridade</h3><div class="dnrow">${donut(pr.map(x=>({v:x.n,c:x.c})),st.pend,'faltam')}${legend(pr.map(x=>({c:x.c,l:x.l,t:`${x.n} · ${brl(x.v).replace(',00','')}`})))}</div></div>
+   <div class="cc wide"><h3>Estimado × gasto por cômodo</h3>
+    <div class="lg inline"><div><i style="background:${COL[2]}"></i><span>Estimado</span></div><div><i style="background:${COL[0]}"></i><span>Gasto</span></div></div>
+    ${rm.map(x=>`<div class="pair"><span>${x.r.emoji} ${esc(x.r.name)}</span><div><div class="bar"><i style="width:${x.est/mx*100}%;background:${COL[2]}"></i></div><div class="bar"><i style="width:${x.paid/mx*100}%;background:${COL[0]}"></i></div></div><em>${brl(x.paid).replace(',00','')}<small>de ${brl(x.est).replace(',00','')}</small></em></div>`).join('')||'<div class="empty" style="color:var(--muted);text-shadow:none;padding:20px">Sem valores ainda.</div>'}</div>
+   <div class="cc"><h3>Onde comprar</h3><p class="sub">O que ainda falta, por loja</p>${lk.map((x,ix)=>hrow(x[0],x[1],lmx,COL[ix%COL.length],brl(x[1]).replace(',00',''))).join('')||'<div class="sub">Tudo comprado!</div>'}</div>
+   <div class="cc"><h3>Mais caros pra comprar</h3>${top.map(i=>`<button class="mini" data-act="edit" data-id="${i.id}">${photo(i)}<div><b>${esc(i.name)}</b><small>${esc(room(i.room).name)}</small></div><span class="price">${brl(i.est).replace(',00','')}</span></button>`).join('')||'<div class="sub">Nada pendente com preço.</div>'}</div>
+   <div class="cc wide"><h3>Pra completar</h3><p class="sub">Quanto do enxoval já está bem preenchido</p>${comp.map(([l,v],ix)=>hrow(l,v,n,COL[ix],`${v} de ${S.items.length}`)).join('')}</div>
+  </div>`;
 }
 function render(keepFocus){
   $('#app').innerHTML=view==='home'?home():view==='room'?roomView():view==='list'?listView():summaryView();
@@ -539,7 +644,7 @@ function itemSheet(id,pre){
     const btn=$('#f-save');btn.disabled=true;btn.textContent='Salvando…';
     let finalImg=img;if(blob){try{finalImg=await uploadPhoto(blob)}catch(e){finalImg=await blobToData(blob)}}
     const d={name,room:$('#f-room').value,prio,loja:$('#f-loja').value.trim(),est:num($('#f-est').value),paid:num($('#f-paid').value),link:$('#f-link').value.trim(),notes:$('#f-notes').value.trim(),img:finalImg};
-    let row;if(id){Object.assign(it,d);row=it}else{row={id:newId('n'),bought:false,...d};S.items.push(row)}
+    let row;if(id){Object.assign(it,d);row=it}else{row={id:newId('n'),bought:false,created_at:new Date().toISOString(),...d};S.items.push(row)}
     closeSheet();render();toast(id?'Item salvo':'Item adicionado');wr(()=>upsertItem(row))};
   if(id)$('#f-del').onclick=()=>{const idx=S.items.findIndex(i=>i.id===id);const [gone]=S.items.splice(idx,1);closeSheet();render();wr(()=>removeRow('items',id));toast('Item excluído','Desfazer',()=>{S.items.splice(idx,0,gone);render();wr(()=>upsertItem(gone))})};
 }
