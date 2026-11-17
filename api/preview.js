@@ -103,29 +103,50 @@ function parse(html, url) {
   return r;
 }
 
+const vazio = x => !x || (!x.name && !x.image && x.price == null);
+
+/* plano B: um serviço que abre a página como um navegador de verdade */
+async function viaMicrolink(url) {
+  const ctl = new AbortController();
+  const to = setTimeout(() => ctl.abort(), 5000);
+  const r = await fetch('https://api.microlink.io/?url=' + encodeURIComponent(url), { signal: ctl.signal });
+  clearTimeout(to);
+  const j = await r.json();
+  if (!j || j.status !== 'success' || !j.data) return null;
+  const d = j.data;
+  return { name: clean(d.title || ''), price: null, image: (d.image && d.image.url) || '' };
+}
+
 async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-  try {
-    let u;
-    try { u = new URL(String((req.query && req.query.url) || '')); } catch (e) { return res.status(200).json({ ok: false, error: 'Link inválido' }); }
-    if (!/^https?:$/.test(u.protocol) || !u.hostname.includes('.') || /^[\d.]+$/.test(u.hostname) || u.hostname.includes(':'))
-      return res.status(200).json({ ok: false, error: 'Link inválido' });
+  let u;
+  try { u = new URL(String((req.query && req.query.url) || '')); } catch (e) { return res.status(200).json({ ok: false, error: 'Link inválido' }); }
+  if (!/^https?:$/.test(u.protocol) || !u.hostname.includes('.') || /^[\d.]+$/.test(u.hostname) || u.hostname.includes(':'))
+    return res.status(200).json({ ok: false, error: 'Link inválido' });
 
+  let d = null, status = 0, motivo = '';
+  try {
     const ctl = new AbortController();
-    const to = setTimeout(() => ctl.abort(), 8000);
+    const to = setTimeout(() => ctl.abort(), 4000);
     const r = await fetch(u.href, {
       redirect: 'follow', signal: ctl.signal,
       headers: { 'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml', 'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.5' }
     });
     clearTimeout(to);
+    status = r.status;
     const html = (await r.text()).slice(0, 2500000);
-    const d = parse(html, r.url || u.href);
-    if (!d.name && !d.image && d.price == null)
-      return res.status(200).json({ ok: false, error: r.ok ? 'Esse site não deixou eu ler a página' : 'O site bloqueou a leitura (' + r.status + ')' });
-    return res.status(200).json({ ok: true, ...d });
-  } catch (e) {
-    return res.status(200).json({ ok: false, error: e.name === 'AbortError' ? 'O site demorou demais' : 'Não consegui abrir esse link' });
+    if (r.ok) d = parse(html, r.url || u.href);
+  } catch (e) { motivo = e.name === 'AbortError' ? 'O site demorou demais' : 'Não consegui abrir esse link'; }
+
+  if (vazio(d) || !d.image) {
+    try {
+      const m = await viaMicrolink(u.href);
+      if (!vazio(m)) d = d ? { name: d.name || m.name, price: d.price, image: d.image || m.image } : m;
+    } catch (e) { /* segue com o que tiver */ }
   }
+
+  if (vazio(d)) return res.status(200).json({ ok: false, error: status >= 400 ? 'O site bloqueou a leitura (' + status + ')' : (motivo || 'Esse site não deixou eu ler a página') });
+  return res.status(200).json({ ok: true, ...d });
 }
 
 module.exports = handler;
