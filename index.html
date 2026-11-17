@@ -444,7 +444,8 @@ function home(){
   <div class="sec"><div class="pill"><h2>Cômodos</h2><span>${S.rooms.length}</span></div></div>
   <div class="grid">${S.rooms.map((r,ix)=>{const s=stats(S.items.filter(i=>i.room===r.id));const pct=s.total?s.done/s.total*100:0;
     return `<button class="room" data-act="room" data-id="${r.id}"><div class="ico" style="${roomIco(ix)}">${r.emoji}</div><div><b>${esc(r.name)}</b><small>${s.total?`${s.done} de ${s.total} ${s.total===1?'comprado':'comprados'}`:'Nenhum item ainda'}</small></div><div class="bar"><i style="width:${pct}%"></i></div></button>`}).join('')}
-  <button class="room add" data-act="newroom"><span>+</span>Novo cômodo</button></div>`;
+  <button class="room add" data-act="newroom"><span>+</span>Novo cômodo</button>
+  <button class="room add" data-act="bm"><span>🔖</span>Botão do navegador</button></div>`;
 }
 function roomView(){
   const r=room(cur);let items=S.items.filter(i=>i.room===cur);const st=stats(items);
@@ -496,13 +497,13 @@ function shrink(file){return new Promise((res,rej)=>{const fr=new FileReader();f
   const m=900,k=Math.min(1,m/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
   c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(b=>b?res(b):rej(new Error('blob')),'image/jpeg',.82)};im.src=fr.result};fr.readAsDataURL(file)})}
 
-function itemSheet(id){
-  const it=id?S.items.find(i=>i.id===id):{room:cur||S.rooms[0].id,name:'',prio:'N',loja:'',est:null,paid:null,bought:false,link:'',notes:'',img:''};
+function itemSheet(id,pre){
+  const it=id?S.items.find(i=>i.id===id):{room:cur||S.rooms[0].id,name:'',prio:'N',loja:'',est:null,paid:null,bought:false,link:'',notes:'',img:'',...(pre||{})};
   let img=it.img||'',prio=it.prio,blob=null;
   openSheet(`<h2>${id?'Editar item':'Novo item'}</h2>
   <label class="lbl" for="f-link" style="margin-top:4px">Link do produto</label>
   <div class="linkbox"><input class="in" id="f-link" placeholder="Cole o link da Amazon, Shopee, ML…" value="${esc(it.link)}" inputmode="url"><button class="btn soft" id="f-fill">Preencher</button></div>
-  <div class="prev"><div id="f-tile"></div><div><small id="f-hint">${id?'Ajuste o que quiser nos campos abaixo.':'Cole o link e eu busco a foto, o nome e o preço. Você ajusta depois.'}</small><button class="btn soft" id="f-photo" type="button">Escolher foto</button><input id="f-file" type="file" accept="image/*" hidden></div></div>
+  <div class="prev"><div id="f-tile"></div><div><small id="f-hint">${id?'Ajuste o que quiser nos campos abaixo.':pre?'Veio do botão do navegador. Escolha o cômodo e ajuste o que quiser.':'Cole o link e eu busco a foto, o nome e o preço. Você ajusta depois.'}</small><button class="btn soft" id="f-photo" type="button">Escolher foto</button><input id="f-file" type="file" accept="image/*" hidden></div></div>
   <label class="lbl" for="f-name">Nome</label><input class="in" id="f-name" placeholder="Ex: Jogo de panelas" value="${esc(it.name)}">
   <div class="two"><div><label class="lbl" for="f-est">Preço estimado</label><input class="in" id="f-est" inputmode="decimal" placeholder="0,00" value="${it.est!=null?String(it.est).replace('.',','):''}"></div>
   <div><label class="lbl" for="f-paid">Preço pago</label><input class="in" id="f-paid" inputmode="decimal" placeholder="0,00" value="${it.paid!=null?String(it.paid).replace('.',','):''}"></div></div>
@@ -529,7 +530,7 @@ function itemSheet(id){
       if(d.image&&!img){img=d.image;blob=null;got.push('foto')}
     }
     if(!$('#f-name').value.trim()){const n=nameFromUrl(u);if(n){$('#f-name').value=n;got.push('nome pelo link')}}
-    hint.textContent=got.length?`Preenchi: ${got.join(', ')}. Ajuste o que quiser.`:(err?err+'. Preencha na mão ou escolha uma foto.':'Link salvo. Preencha o nome.');
+    hint.textContent=got.length?`Preenchi: ${got.join(', ')}. Ajuste o que quiser.`:(err?err+'. Use o botão do navegador (tela inicial) ou preencha na mão.':'Link salvo. Preencha o nome.');
     if(d&&!d.image&&!img)hint.textContent+=' Não achei a foto, você pode escolher uma do celular.';
     btn.disabled=false;btn.textContent='Preencher';filling=false;tileNow()};
   $('#f-fill').onclick=fill;$('#f-link').addEventListener('paste',()=>setTimeout(fill,60));
@@ -553,6 +554,44 @@ function roomSheet(){
     const r={id:newId('r'),name,emoji:emo,position:S.rooms.length};S.rooms.push(r);closeSheet();render();toast('Cômodo criado');wr(()=>upsertRoom(r))};
 }
 
+/* ============ BOTÃO DO NAVEGADOR (favorito que lê a página da loja e manda pro app) ============ */
+function bmFn(O){
+ var d=document,q=function(s){return d.querySelector(s)};
+ var m=function(k){var e=q('meta[property="'+k+'"],meta[name="'+k+'"],meta[itemprop="'+k+'"]');return e&&e.content?e.content:''};
+ var n='',p='',im='';
+ try{[].slice.call(d.querySelectorAll('script[type="application/ld+json"]')).forEach(function(s){
+  try{(function w(x){if(!x)return;if(Array.isArray(x))return x.forEach(w);if(typeof x==='object'){
+   if(/Product/.test([].concat(x['@type']||[]).join())){n=n||x.name||'';var i=[].concat(x.image||[])[0];im=im||(i&&i.url)||(typeof i==='string'?i:'');var o=[].concat(x.offers||[])[0]||{};p=p||o.price||o.lowPrice||''}
+   if(x['@graph'])w(x['@graph'])}})(JSON.parse(s.textContent))}catch(e){}})}catch(e){}
+ n=n||m('og:title')||d.title;im=im||m('og:image');p=p||m('product:price:amount')||m('og:price:amount')||m('price');
+ var t=q('#productTitle');
+ if(t){n=t.textContent.trim();var li=q('#landingImage');if(li)im=li.getAttribute('data-old-hires')||li.src;var a=q('.a-price .a-offscreen');if(a)p=a.textContent}
+ if(!p){var r=(d.body.innerText||'').match(/R\$\s*([\d.]+,\d{2})/);if(r)p=r[1]}
+ var u=O+'/#add='+encodeURIComponent(JSON.stringify({n:String(n).slice(0,200),p:String(p),i:im,l:location.href}));
+ var x=window.open(u,'_blank');if(!x)location.href=u
+}
+const bmHref=()=>'javascript:'+encodeURIComponent('('+bmFn.toString().replace(/\n\s*/g,'')+')('+JSON.stringify(location.origin)+')');
+function bmSheet(){
+  openSheet(`<h2>Botão do navegador</h2>
+  <p style="color:var(--muted);font-size:14px;line-height:1.5;margin:4px 0 0">Funciona no computador, com Shopee, Mercado Livre, Amazon e qualquer loja. Ele lê a foto, o nome e o preço da página que você está vendo e traz tudo pra cá.</p>
+  <ol style="font-size:14px;line-height:1.7;padding-left:20px;margin:14px 0">
+   <li>Mostre a barra de favoritos do navegador (<b>Cmd+Shift+B</b> no Mac, <b>Ctrl+Shift+B</b> no Windows).</li>
+   <li>Arraste o botão abaixo até essa barra.</li>
+   <li>Abra a página de um produto e clique nele.</li></ol>
+  <div style="text-align:center;margin:20px 0 6px"><a id="bm-a" class="btn" href="#" style="display:inline-block;text-decoration:none">＋ Enxoval</a></div>`);
+  const a=$('#bm-a');a.setAttribute('href',bmHref());a.onclick=e=>{e.preventDefault();toast('Arraste esse botão até a barra de favoritos')};
+}
+const pnum=v=>{v=String(v||'').replace(/[^\d.,]/g,'');if(!v)return null;const n=v.includes(',')?num(v):parseFloat(v);return isFinite(n)&&n>0?n:null};
+function fromHash(){
+  const m=location.hash.match(/^#add=(.+)$/);if(!m)return;
+  try{
+    const o=JSON.parse(decodeURIComponent(m[1]));history.replaceState(null,'',location.pathname+location.search);
+    const l=String(o.l||'');
+    const nm=String(o.n||'').replace(/^Amazon\.com\.br\s*:\s*/i,'').replace(/\s*:\s*Amazon\.com\.br.*$/i,'').replace(/\s*[|–-]\s*(Shopee|Mercado ?Livre|Magazine|Casas ?Bahia).*$/i,'').replace(/\s+/g,' ').trim();
+    itemSheet(null,{name:nm.length>90?nm.slice(0,90).replace(/\s+\S*$/,'')+'…':nm,est:pnum(o.p),link:l,loja:lojaFromUrl(l),img:/^https?:\/\//i.test(o.i||'')?o.i:''});
+  }catch(e){console.error(e)}
+}
+
 /* ============ EVENTOS ============ */
 document.addEventListener('click',e=>{
   if(e.target.id==='ov'){closeSheet();return}
@@ -568,6 +607,7 @@ document.addEventListener('click',e=>{
   else if(act==='group'){group=id;render()}
   else if(act==='vm'){vm=id;render()}
   else if(act==='newroom')roomSheet();
+  else if(act==='bm')bmSheet();
   else if(act==='delroom'){const n=S.items.filter(i=>i.room===cur).length;
     if(n){toast('Esvazie o cômodo antes de excluir ('+n+' itens)');return}
     const gone=cur;S.rooms=S.rooms.filter(r=>r.id!==gone);view='home';render();toast('Cômodo excluído');wr(()=>removeRow('rooms',gone))}
@@ -580,7 +620,7 @@ async function boot(){
   try{
     let d=await loadAll();
     if(!d.rooms.length&&!d.items.length){$('#app').innerHTML='<div class="empty" style="margin-top:40vh">Preparando tudo pela primeira vez…<br>só um instante.</div>';await seed();d=await loadAll()}
-    S=d;render();
+    S=d;render();fromHash();
   }catch(e){
     $('#app').innerHTML='<div class="empty" style="margin-top:30vh">Não consegui conectar.<br><small>'+esc(e.message)+'</small><br><br><button class="btn" id="retry">Tentar de novo</button></div>';
     $('#retry').onclick=boot;return;
