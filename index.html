@@ -390,7 +390,7 @@ const hash=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;ret
 const PAL=[['#DDE6C8','#B9C98F'],['#E3DDF0','#B9B0DA'],['#F0E7C0','#D9C672'],['#CFE4DE','#8FBBB1'],['#F1DDE5','#D7AEC1'],['#E8EBD2','#A9B98A']];
 const KW=[[/panela|frigideira|cuscuz|assadeira|forma/i,'🍳'],[/copo|taça|caneca|xícara|jarra|garrafa/i,'🥂'],[/prato|bowl|tigela|petisq|boleira/i,'🍽️'],[/faca|talher|ralador|descascador|abridor|tábua|tesoura/i,'🔪'],[/geladeira|gelo|filtro/i,'🧊'],[/fogão|cooktop/i,'🔥'],[/liquidific|batedeira|mixer|espremedor|sanduich|cafeteira|suggar/i,'🥤'],[/lençol|colcha|manta|travesseiro|pillow|almofada|cama/i,'🛏️'],[/toalha|banho|sanitária/i,'🛁'],[/tapete/i,'🧶'],[/cesto|varal|roupa|ferro|passar|lavar|prendedor/i,'🧺'],[/interruptor|dimmer|luz|vela/i,'💡'],[/sofá/i,'🛋️'],[/mesa|rack|prateleira|armário|guarda/i,'🪑'],[/cortina/i,'🪟'],[/ventilador/i,'🌀'],[/pote|dispenser|saleiro|manteig|funil|condimento/i,'🫙'],[/lixeira/i,'🗑️'],[/vassoura|rodo|pano|balde|escov|aspirador|mop/i,'🧹'],[/remédio|termômetro/i,'🩺']];
 function photo(it,extra=''){
-  if(it.img)return `<div class="ph ${extra}"><img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy"></div>`;
+  if(it.img)return `<div class="ph ${extra}"><img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy" referrerpolicy="no-referrer"></div>`;
   const p=PAL[hash(it.name)%PAL.length];const e=(KW.find(k=>k[0].test(it.name))||[0,room(it.room).emoji])[1];
   return `<div class="ph ghost ${extra}" style="background:linear-gradient(150deg,${p[0]},${p[1]})"><span class="em">${e}</span></div>`;
 }
@@ -502,7 +502,7 @@ function itemSheet(id){
   openSheet(`<h2>${id?'Editar item':'Novo item'}</h2>
   <label class="lbl" for="f-link" style="margin-top:4px">Link do produto</label>
   <div class="linkbox"><input class="in" id="f-link" placeholder="Cole o link da Amazon, Shopee, ML…" value="${esc(it.link)}" inputmode="url"><button class="btn soft" id="f-fill">Preencher</button></div>
-  <div class="prev"><div id="f-tile"></div><div><small id="f-hint">${id?'Ajuste o que quiser nos campos abaixo.':'Cole o link e eu sugiro o nome e a loja. Você edita depois.'}</small><button class="btn soft" id="f-photo" type="button">Escolher foto</button><input id="f-file" type="file" accept="image/*" hidden></div></div>
+  <div class="prev"><div id="f-tile"></div><div><small id="f-hint">${id?'Ajuste o que quiser nos campos abaixo.':'Cole o link e eu busco a foto, o nome e o preço. Você ajusta depois.'}</small><button class="btn soft" id="f-photo" type="button">Escolher foto</button><input id="f-file" type="file" accept="image/*" hidden></div></div>
   <label class="lbl" for="f-name">Nome</label><input class="in" id="f-name" placeholder="Ex: Jogo de panelas" value="${esc(it.name)}">
   <div class="two"><div><label class="lbl" for="f-est">Preço estimado</label><input class="in" id="f-est" inputmode="decimal" placeholder="0,00" value="${it.est!=null?String(it.est).replace('.',','):''}"></div>
   <div><label class="lbl" for="f-paid">Preço pago</label><input class="in" id="f-paid" inputmode="decimal" placeholder="0,00" value="${it.paid!=null?String(it.paid).replace('.',','):''}"></div></div>
@@ -516,9 +516,22 @@ function itemSheet(id){
   $('#f-prio').onclick=e=>{const b=e.target.closest('button');if(!b)return;prio=b.dataset.p;[...$('#f-prio').children].forEach(x=>x.classList.toggle('on',x===b))};
   $('#f-photo').onclick=()=>$('#f-file').click();
   $('#f-file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{blob=await shrink(f);img=URL.createObjectURL(blob);tileNow()}catch(x){toast('Não consegui abrir essa foto')}};
-  const fill=()=>{const u=$('#f-link').value.trim();if(!u)return;const l=lojaFromUrl(u),n=nameFromUrl(u);
-    if(l&&!$('#f-loja').value)$('#f-loja').value=l;if(n&&!$('#f-name').value)$('#f-name').value=n;
-    $('#f-hint').textContent=(l||n)?`Sugestão pelo link${l?' · '+l:''}. Ajuste o nome se precisar.`:'Link salvo. Preencha o nome.';tileNow()};
+  let filling=false;
+  const fill=async()=>{const u=$('#f-link').value.trim();if(!u||filling)return;filling=true;
+    const l=lojaFromUrl(u);if(l&&!$('#f-loja').value)$('#f-loja').value=l;
+    const btn=$('#f-fill'),hint=$('#f-hint');btn.disabled=true;btn.textContent='Buscando…';hint.textContent='Buscando foto, nome e preço…';
+    let d=null,err='';
+    try{const r=await fetch('/api/preview?url='+encodeURIComponent(u));d=await r.json();if(!d.ok){err=d.error||'';d=null}}catch(e){err='Sem conexão com o buscador'}
+    const got=[];
+    if(d){
+      if(d.name&&!$('#f-name').value.trim()){$('#f-name').value=d.name;got.push('nome')}
+      if(d.price!=null&&!$('#f-est').value.trim()){$('#f-est').value=String(d.price).replace('.',',');got.push('preço')}
+      if(d.image&&!img){img=d.image;blob=null;got.push('foto')}
+    }
+    if(!$('#f-name').value.trim()){const n=nameFromUrl(u);if(n){$('#f-name').value=n;got.push('nome pelo link')}}
+    hint.textContent=got.length?`Preenchi: ${got.join(', ')}. Ajuste o que quiser.`:(err?err+'. Preencha na mão ou escolha uma foto.':'Link salvo. Preencha o nome.');
+    if(d&&!d.image&&!img)hint.textContent+=' Não achei a foto, você pode escolher uma do celular.';
+    btn.disabled=false;btn.textContent='Preencher';filling=false;tileNow()};
   $('#f-fill').onclick=fill;$('#f-link').addEventListener('paste',()=>setTimeout(fill,60));
   $('#f-name').oninput=()=>{if(!img)tileNow()};
   $('#f-save').onclick=async()=>{const name=$('#f-name').value.trim();if(!name){$('#f-name').focus();$('#f-name').style.borderColor='#CF6249';return}
